@@ -1,6 +1,7 @@
 using Application;
 using Infrastructure;
 using Serilog;
+using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,9 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Global exception handling middleware
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseAuthorization();
 
