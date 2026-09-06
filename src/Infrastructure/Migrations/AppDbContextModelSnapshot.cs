@@ -1,97 +1,174 @@
-using Domain.Entities;
-using Domain.ValueObjects;
-using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Infrastructure.Data;
 
-namespace Infrastructure.Migrations;
+#nullable disable
 
-[DbContext(typeof(AppDbContext))]
-partial class AppDbContextModelSnapshot : ModelSnapshot
+namespace Infrastructure.Migrations
 {
-    protected override void BuildModel(ModelBuilder modelBuilder)
+    [DbContext(typeof(AppDbContext))]
+    partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        modelBuilder
-            .HasAnnotation("ProductVersion", "8.0.10")
-            .HasAnnotation("Relational:MaxIdentifierLength", 128);
-
-        modelBuilder.Entity<Customer>(entity =>
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Id).HasColumnName("CustomerId");
+#pragma warning disable 612, 618
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
-            entity.Property(e => e.FirstName)
-                .IsRequired()
-                .HasMaxLength(50);
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            entity.Property(e => e.LastName)
-                .IsRequired()
-                .HasMaxLength(50);
+            modelBuilder.Entity("Domain.Entities.Customer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("CustomerId");
 
-            entity.Property(e => e.IsActive)
-                .IsRequired()
-                .HasDefaultValue(true);
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
-            entity.Property(e => e.CreatedAt)
-                .IsRequired()
-                .HasDefaultValueSql("GETUTCDATE()");
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-            entity.Property(e => e.UpdatedAt)
-                .IsRequired(false);
+                    b.Property<bool>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(true);
 
-            entity.OwnsOne(e => e.Email, email =>
-            {
-                email.Property(e => e.Value)
-                    .HasColumnName("Email")
-                    .IsRequired()
-                    .HasMaxLength(255);
-                email.HasIndex(e => e.Value).IsUnique();
-            });
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
-            entity.OwnsOne(e => e.BillingAddress, address =>
-            {
-                address.Property(a => a.Street)
-                    .HasColumnName("BillingStreet")
-                    .IsRequired()
-                    .HasMaxLength(200);
-                address.Property(a => a.City)
-                    .HasColumnName("BillingCity")
-                    .IsRequired()
-                    .HasMaxLength(100);
-                address.Property(a => a.State)
-                    .HasColumnName("BillingState")
-                    .IsRequired()
-                    .HasMaxLength(100);
-                address.Property(a => a.PostalCode)
-                    .HasColumnName("BillingPostalCode")
-                    .IsRequired()
-                    .HasMaxLength(20);
-                address.Property(a => a.Country)
-                    .HasColumnName("BillingCountry")
-                    .IsRequired()
-                    .HasMaxLength(100);
-            });
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
-            entity.OwnsOne(e => e.ShippingAddress, address =>
-            {
-                address.Property(a => a.Street)
-                    .HasColumnName("ShippingStreet")
-                    .HasMaxLength(200);
-                address.Property(a => a.City)
-                    .HasColumnName("ShippingCity")
-                    .HasMaxLength(100);
-                address.Property(a => a.State)
-                    .HasColumnName("ShippingState")
-                    .HasMaxLength(100);
-                address.Property(a => a.PostalCode)
-                    .HasColumnName("ShippingPostalCode")
-                    .HasMaxLength(20);
-                address.Property(a => a.Country)
-                    .HasColumnName("ShippingCountry")
-                    .HasMaxLength(100);
-            });
+                    b.HasKey("Id");
 
-            entity.Ignore(e => e.FullName);
-        });
+                    b.ToTable("Customers");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Customer", b =>
+                {
+                    b.OwnsOne("Domain.ValueObjects.Email", "Email", b1 =>
+                        {
+                            b1.Property<Guid>("CustomerId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Value")
+                                .IsRequired()
+                                .HasMaxLength(255)
+                                .HasColumnType("nvarchar(255)")
+                                .HasColumnName("Email");
+
+                            b1.HasKey("CustomerId");
+
+                            b1.HasIndex("Value")
+                                .IsUnique();
+
+                            b1.ToTable("Customers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomerId");
+                        });
+
+                    b.OwnsOne("Domain.ValueObjects.Address", "BillingAddress", b1 =>
+                        {
+                            b1.Property<Guid>("CustomerId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("BillingCity");
+
+                            b1.Property<string>("Country")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("BillingCountry");
+
+                            b1.Property<string>("PostalCode")
+                                .IsRequired()
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)")
+                                .HasColumnName("BillingPostalCode");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("BillingState");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("BillingStreet");
+
+                            b1.HasKey("CustomerId");
+
+                            b1.ToTable("Customers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomerId");
+                        });
+
+                    b.OwnsOne("Domain.ValueObjects.Address", "ShippingAddress", b1 =>
+                        {
+                            b1.Property<Guid>("CustomerId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("City")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("ShippingCity");
+
+                            b1.Property<string>("Country")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("ShippingCountry");
+
+                            b1.Property<string>("PostalCode")
+                                .HasMaxLength(20)
+                                .HasColumnType("nvarchar(20)")
+                                .HasColumnName("ShippingPostalCode");
+
+                            b1.Property<string>("State")
+                                .HasMaxLength(100)
+                                .HasColumnType("nvarchar(100)")
+                                .HasColumnName("ShippingState");
+
+                            b1.Property<string>("Street")
+                                .HasMaxLength(200)
+                                .HasColumnType("nvarchar(200)")
+                                .HasColumnName("ShippingStreet");
+
+                            b1.HasKey("CustomerId");
+
+                            b1.ToTable("Customers");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomerId");
+                        });
+
+                    b.Navigation("BillingAddress")
+                        .IsRequired();
+
+                    b.Navigation("Email")
+                        .IsRequired();
+
+                    b.Navigation("ShippingAddress");
+                });
+#pragma warning restore 612, 618
+        }
     }
 }
