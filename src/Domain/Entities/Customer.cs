@@ -5,10 +5,10 @@ namespace Domain.Entities;
 
 public class Customer : Entity
 {
-    public string FirstName { get; private set; }
-    public string LastName { get; private set; }
-    public Email Email { get; private set; }
-    public Address BillingAddress { get; private set; }
+    public string FirstName { get; private set; } = null!;
+    public string LastName { get; private set; } = null!;
+    public Email Email { get; private set; } = null!;
+    public Address BillingAddress { get; private set; } = null!;
     public Address? ShippingAddress { get; private set; }
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -16,10 +16,6 @@ public class Customer : Entity
 
     private Customer()
     {
-        FirstName = null!;
-        LastName = null!;
-        Email = null!;
-        BillingAddress = null!;
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
