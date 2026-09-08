@@ -27,10 +27,14 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ShouldReturnSuccess_WhenCustomerUpdated()
     {
         // Arrange
+        var customerId = Guid.NewGuid();
         var customer = new Customer("John", "Doe", _email, _address);
+        var idProperty = typeof(Entity).GetProperty("Id");
+        idProperty?.SetValue(customer, customerId);
+
         var command = new UpdateCustomerCommand
         {
-            Id = customer.Id,
+            Id = customerId,
             FirstName = "Jane",
             LastName = "Smith",
             Email = "jane.smith@example.com",
@@ -41,7 +45,7 @@ public class UpdateCustomerCommandHandlerTests
             Country = "USA"
         };
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(customer.Id, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(customer);
         _repositoryMock.Setup(r => r.Update(It.IsAny<Customer>()));
         _repositoryMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
@@ -52,21 +56,26 @@ public class UpdateCustomerCommandHandlerTests
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        _repositoryMock.Verify(r => r.GetByIdAsync(customer.Id, It.IsAny<CancellationToken>()), Times.Once);
-        _repositoryMock.Verify(r => r.Update(customer), Times.Once);
+        _repositoryMock.Verify(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Customer>()), Times.Once);
         _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        
+        // Verify customer was updated
         customer.FirstName.Should().Be("Jane");
         customer.LastName.Should().Be("Smith");
         customer.Email.Value.Should().Be("jane.smith@example.com");
+        customer.BillingAddress.Street.Should().Be("456 Oak Ave");
+        customer.UpdatedAt.Should().NotBeNull();
     }
 
     [Fact]
     public async Task Handle_ShouldReturnFailure_WhenCustomerNotFound()
     {
         // Arrange
+        var customerId = Guid.NewGuid();
         var command = new UpdateCustomerCommand
         {
-            Id = Guid.NewGuid(),
+            Id = customerId,
             FirstName = "Jane",
             LastName = "Smith",
             Email = "jane.smith@example.com",
@@ -77,16 +86,17 @@ public class UpdateCustomerCommandHandlerTests
             Country = "USA"
         };
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(command.Id, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((Customer)null!);
+        _repositoryMock.Setup(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync((Customer?)null);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
 
         // Assert
         result.IsSuccess.Should().BeFalse();
-        result.Error.Should().Contain($"Customer with ID {command.Id} not found");
+        result.Error.Should().Contain($"Customer with ID {customerId} not found");
         result.ErrorCode.Should().Be("NOT_FOUND");
+        _repositoryMock.Verify(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()), Times.Once);
         _repositoryMock.Verify(r => r.Update(It.IsAny<Customer>()), Times.Never);
         _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -95,10 +105,14 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ShouldReturnFailure_WhenEmailInvalid()
     {
         // Arrange
+        var customerId = Guid.NewGuid();
         var customer = new Customer("John", "Doe", _email, _address);
+        var idProperty = typeof(Entity).GetProperty("Id");
+        idProperty?.SetValue(customer, customerId);
+
         var command = new UpdateCustomerCommand
         {
-            Id = customer.Id,
+            Id = customerId,
             FirstName = "Jane",
             LastName = "Smith",
             Email = "invalid-email",
@@ -109,7 +123,7 @@ public class UpdateCustomerCommandHandlerTests
             Country = "USA"
         };
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(customer.Id, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(customer);
 
         // Act
@@ -119,6 +133,7 @@ public class UpdateCustomerCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Validation error");
         result.ErrorCode.Should().Be("VALIDATION_ERROR");
+        _repositoryMock.Verify(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()), Times.Once);
         _repositoryMock.Verify(r => r.Update(It.IsAny<Customer>()), Times.Never);
         _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -127,10 +142,14 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ShouldReturnFailure_WhenAddressInvalid()
     {
         // Arrange
+        var customerId = Guid.NewGuid();
         var customer = new Customer("John", "Doe", _email, _address);
+        var idProperty = typeof(Entity).GetProperty("Id");
+        idProperty?.SetValue(customer, customerId);
+
         var command = new UpdateCustomerCommand
         {
-            Id = customer.Id,
+            Id = customerId,
             FirstName = "Jane",
             LastName = "Smith",
             Email = "jane.smith@example.com",
@@ -141,7 +160,7 @@ public class UpdateCustomerCommandHandlerTests
             Country = "USA"
         };
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(customer.Id, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(customer);
 
         // Act
@@ -151,6 +170,7 @@ public class UpdateCustomerCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Validation error");
         result.ErrorCode.Should().Be("VALIDATION_ERROR");
+        _repositoryMock.Verify(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()), Times.Once);
         _repositoryMock.Verify(r => r.Update(It.IsAny<Customer>()), Times.Never);
         _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
@@ -159,10 +179,14 @@ public class UpdateCustomerCommandHandlerTests
     public async Task Handle_ShouldReturnFailure_WhenRepositoryThrowsException()
     {
         // Arrange
+        var customerId = Guid.NewGuid();
         var customer = new Customer("John", "Doe", _email, _address);
+        var idProperty = typeof(Entity).GetProperty("Id");
+        idProperty?.SetValue(customer, customerId);
+
         var command = new UpdateCustomerCommand
         {
-            Id = customer.Id,
+            Id = customerId,
             FirstName = "Jane",
             LastName = "Smith",
             Email = "jane.smith@example.com",
@@ -173,7 +197,7 @@ public class UpdateCustomerCommandHandlerTests
             Country = "USA"
         };
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(customer.Id, It.IsAny<CancellationToken>()))
+        _repositoryMock.Setup(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(customer);
         _repositoryMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
             .ThrowsAsync(new Exception("Database error"));
@@ -185,6 +209,8 @@ public class UpdateCustomerCommandHandlerTests
         result.IsSuccess.Should().BeFalse();
         result.Error.Should().Contain("Failed to update customer");
         result.ErrorCode.Should().Be("UPDATE_FAILED");
-        _repositoryMock.Verify(r => r.Update(customer), Times.Once);
+        _repositoryMock.Verify(r => r.GetByIdAsync(customerId, It.IsAny<CancellationToken>()), Times.Once);
+        _repositoryMock.Verify(r => r.Update(It.IsAny<Customer>()), Times.Once);
+        _repositoryMock.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 }
