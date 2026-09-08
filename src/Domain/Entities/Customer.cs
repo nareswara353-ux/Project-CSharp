@@ -14,7 +14,15 @@ public class Customer : Entity
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
-    private Customer() { } // For EF Core
+    private Customer()
+    {
+        FirstName = null!;
+        LastName = null!;
+        Email = null!;
+        BillingAddress = null!;
+        IsActive = true;
+        CreatedAt = DateTime.UtcNow;
+    }
 
     public Customer(
         string firstName,
