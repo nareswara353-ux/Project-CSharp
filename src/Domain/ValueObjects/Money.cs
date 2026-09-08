@@ -5,9 +5,13 @@ namespace Domain.ValueObjects;
 public sealed class Money : ValueObject
 {
     public decimal Amount { get; }
-    public string Currency { get; }
+    public string Currency { get; } = string.Empty;
 
-    private Money() { } // For EF Core
+    private Money()
+    {
+        Amount = 0;
+        Currency = string.Empty;
+    }
 
     public Money(decimal amount, string currency)
     {
