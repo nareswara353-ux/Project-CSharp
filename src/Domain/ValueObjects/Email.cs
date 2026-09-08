@@ -7,7 +7,10 @@ public sealed partial class Email : ValueObject
 {
     public string Value { get; }
 
-    private Email() { } // For EF Core
+    private Email()
+    {
+        Value = null!;
+    }
 
     private Email(string value)
     {
@@ -19,10 +22,8 @@ public sealed partial class Email : ValueObject
         if (string.IsNullOrWhiteSpace(email))
             throw new ArgumentException("Email cannot be empty", nameof(email));
 
-        // Trim and normalize
         var normalized = email.Trim().ToLowerInvariant();
 
-        // Validate format using regex
         if (!EmailRegex().IsMatch(normalized))
             throw new ArgumentException($"Invalid email format: {email}", nameof(email));
 
