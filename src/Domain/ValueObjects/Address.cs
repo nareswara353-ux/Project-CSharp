@@ -10,7 +10,14 @@ public sealed class Address : ValueObject
     public string PostalCode { get; }
     public string Country { get; }
 
-    private Address() { } // For EF Core
+    private Address()
+    {
+        Street = null!;
+        City = null!;
+        State = null!;
+        PostalCode = null!;
+        Country = null!;
+    }
 
     public Address(string street, string city, string state, string postalCode, string country)
     {
