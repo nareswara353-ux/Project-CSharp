@@ -11,34 +11,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Setup .NET 8
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Restore dependencies
-      run: dotnet restore
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Build
-      run: dotnet build --no-restore -c Release
+      - name: Build
+        run: dotnet build --no-restore -c Release
 
-    - name: Run tests
-      run: dotnet test --no-build -c Release --verbosity normal --collect:"XPlat Code Coverage"
+      - name: Run tests
+        run: dotnet test --no-build -c Release --verbosity normal --collect:"XPlat Code Coverage"
 
-    - name: Upload test results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: **/TestResults/
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: '**/TestResults/'
 
-    - name: Publish WebAPI
-      run: dotnet publish src/WebAPI/WebAPI.csproj -c Release -o ./publish
+      - name: Publish WebAPI
+        run: dotnet publish src/WebAPI/WebAPI.csproj -c Release -o ./publish
 
-    - name: Upload publish artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: webapi-publish
-        path: ./publish
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webapi-publish
+          path: ./publish
