@@ -1,8 +1,14 @@
+using Domain.Events;
+
 namespace Domain.Common;
 
-public abstract class Entity : IEquatable<Entity>
+public abstract class Entity : IEquatable<Entity>, IHasDomainEvents
 {
+    private readonly List<IDomainEvent> _domainEvents = new();
+
     public Guid Id { get; protected set; }
+
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected Entity()
     {
@@ -12,6 +18,16 @@ public abstract class Entity : IEquatable<Entity>
     protected Entity(Guid id)
     {
         Id = id;
+    }
+
+    protected void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public void ClearDomainEvents()
+    {
+        _domainEvents.Clear();
     }
 
     public override bool Equals(object? obj)
