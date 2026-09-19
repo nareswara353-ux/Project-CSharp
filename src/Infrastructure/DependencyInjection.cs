@@ -13,7 +13,6 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        // Register DbContext with SQL Server
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(
                 configuration.GetConnectionString("DefaultConnection"),
@@ -24,8 +23,8 @@ public static class DependencyInjection
                         errorNumbersToAdd: null)
                     .CommandTimeout(60)));
 
-        // Register generic repository
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
+        services.AddScoped<IOrderRepository, EfOrderRepository>();
 
         return services;
     }
