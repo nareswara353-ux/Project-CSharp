@@ -1,4 +1,5 @@
 using Domain.Common;
+using Domain.Enums;
 using Domain.ValueObjects;
 
 namespace Domain.Entities;
@@ -48,7 +49,6 @@ public class Order : Entity
         if (quantity is null || quantity.IsZero)
             throw new ArgumentException("Quantity must be positive", nameof(quantity));
 
-        // Check if product already exists in the order
         var existingLine = _lines.FirstOrDefault(l => l.ProductId == productId);
         if (existingLine is not null)
         {
