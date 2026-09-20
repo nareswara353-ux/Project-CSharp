@@ -41,13 +41,16 @@ public class GlobalExceptionMiddleware
                 context.Request.Method,
                 context.Request.Path);
 
-            await WriteResponseAsync(
-                context,
-                HttpStatusCode.BadRequest,
-                ApiResponse.Failure(
-                    validationException.Errors.Select(e => e.ErrorMessage).ToList(),
-                    "VALIDATION_ERROR",
-                    StatusCodes.Status400BadRequest));
+            var errorMessages = validationException.Errors
+                .Select(e => e.ErrorMessage)
+                .ToList();
+
+            var response = ApiResponse.Failure(
+                errorMessages,
+                "VALIDATION_ERROR",
+                StatusCodes.Status400BadRequest);
+
+            await WriteResponseAsync(context, HttpStatusCode.BadRequest, response);
         }
         catch (Exception exception)
         {
@@ -64,10 +67,12 @@ public class GlobalExceptionMiddleware
                 ? exception.Message
                 : "An internal server error occurred. Please try again later.";
 
-            await WriteResponseAsync(
-                context,
-                statusCode,
-                ApiResponse.Failure(message, exception.GetType().Name, (int)statusCode));
+            var response = ApiResponse.Failure(
+                message,
+                exception.GetType().Name,
+                (int)statusCode);
+
+            await WriteResponseAsync(context, statusCode, response);
         }
     }
 
