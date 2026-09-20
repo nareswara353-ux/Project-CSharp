@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
-using Serilog;
+using FluentValidation;
+using WebAPI.Common;
 
 namespace WebAPI.Middleware;
 
@@ -8,11 +9,22 @@ public class GlobalExceptionMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<GlobalExceptionMiddleware> _logger;
+    private readonly IHostEnvironment _environment;
 
-    public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        WriteIndented = false
+    };
+
+    public GlobalExceptionMiddleware(
+        RequestDelegate next,
+        ILogger<GlobalExceptionMiddleware> logger,
+        IHostEnvironment environment)
     {
         _next = next;
         _logger = logger;
+        _environment = environment;
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -21,45 +33,70 @@ public class GlobalExceptionMiddleware
         {
             await _next(context);
         }
-        catch (Exception ex)
+        catch (ValidationException validationException)
         {
-            _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
-            Log.Error(ex, "Unhandled exception: {Message}", ex.Message);
+            _logger.LogWarning(
+                validationException,
+                "Validation failed for {Method} {Path}",
+                context.Request.Method,
+                context.Request.Path);
 
-            await HandleExceptionAsync(context, ex);
+            await WriteResponseAsync(
+                context,
+                HttpStatusCode.BadRequest,
+                ApiResponse.Failure(
+                    validationException.Errors.Select(e => e.ErrorMessage).ToList(),
+                    "VALIDATION_ERROR",
+                    StatusCodes.Status400BadRequest));
+        }
+        catch (Exception exception)
+        {
+            _logger.LogError(
+                exception,
+                "Unhandled exception for {Method} {Path}: {Message}",
+                context.Request.Method,
+                context.Request.Path,
+                exception.Message);
+
+            var statusCode = MapStatusCode(exception);
+
+            var message = _environment.IsDevelopment()
+                ? exception.Message
+                : "An internal server error occurred. Please try again later.";
+
+            await WriteResponseAsync(
+                context,
+                statusCode,
+                ApiResponse.Failure(message, exception.GetType().Name, (int)statusCode));
         }
     }
 
-    private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
+    private static HttpStatusCode MapStatusCode(Exception exception) => exception switch
     {
+        ArgumentException or ArgumentNullException => HttpStatusCode.BadRequest,
+        UnauthorizedAccessException => HttpStatusCode.Unauthorized,
+        KeyNotFoundException => HttpStatusCode.NotFound,
+        InvalidOperationException => HttpStatusCode.Conflict,
+        _ => HttpStatusCode.InternalServerError
+    };
+
+    private static async Task WriteResponseAsync(
+        HttpContext context,
+        HttpStatusCode statusCode,
+        ApiResponse response)
+    {
+        if (context.Response.HasStarted)
+            return;
+
+        context.Response.Clear();
+        context.Response.StatusCode = (int)statusCode;
         context.Response.ContentType = "application/json";
 
-        var response = new
-        {
-            StatusCode = (int)HttpStatusCode.InternalServerError,
-            Message = "An internal server error occurred. Please try again later.",
-            Detail = exception.Message,
-            // Optional: Include stack trace only in development
-            StackTrace = context.RequestServices.GetService<IWebHostEnvironment>()?.IsDevelopment() == true
-                ? exception.StackTrace
-                : null
-        };
+        var correlationId = context.Items["CorrelationId"]?.ToString();
+        if (!string.IsNullOrWhiteSpace(correlationId))
+            context.Response.Headers["X-Correlation-Id"] = correlationId;
 
-        // Customize status code based on exception type
-        context.Response.StatusCode = exception switch
-        {
-            ArgumentException or ArgumentNullException => (int)HttpStatusCode.BadRequest,
-            InvalidOperationException => (int)HttpStatusCode.Conflict,
-            UnauthorizedAccessException => (int)HttpStatusCode.Unauthorized,
-            _ => (int)HttpStatusCode.InternalServerError
-        };
-
-        var json = JsonSerializer.Serialize(response, new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            WriteIndented = true
-        });
-
+        var json = JsonSerializer.Serialize(response, SerializerOptions);
         await context.Response.WriteAsync(json);
     }
 }
