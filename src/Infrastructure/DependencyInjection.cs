@@ -1,7 +1,9 @@
 using Application.Common;
 using Domain.Repositories;
+using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
+using Infrastructure.Events;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,6 +30,9 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<IOrderRepository, EfOrderRepository>();
         services.AddScoped<IUserRepository, EfUserRepository>();
+
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
