@@ -1,33 +1,40 @@
-# Build stage
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copy solution and project files
-COPY PortfolioEnterprise.sln .
-COPY src/Domain/*.csproj src/Domain/
-COPY src/Application/*.csproj src/Application/
-COPY src/Infrastructure/*.csproj src/Infrastructure/
-COPY src/WebAPI/*.csproj src/WebAPI/
-COPY tests/Core.Tests/*.csproj tests/Core.Tests/
+COPY Directory.Build.props Directory.Packages.props ./
+COPY PortfolioEnterprise.sln ./
+COPY src/Domain/Domain.csproj src/Domain/
+COPY src/Application/Application.csproj src/Application/
+COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
+COPY src/WebAPI/WebAPI.csproj src/WebAPI/
+COPY tests/Core.Tests/Core.Tests.csproj tests/Core.Tests/
 
-# Restore dependencies
-RUN dotnet restore
+RUN dotnet restore PortfolioEnterprise.sln
 
-# Copy all source
 COPY src/ src/
 COPY tests/ tests/
 
-# Publish WebAPI
-WORKDIR /src/src/WebAPI
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish src/WebAPI/WebAPI.csproj -c Release -o /app/publish --no-restore
 
-# Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
 
-COPY --from=build /app/publish .
+RUN groupadd --gid 1000 appuser \
+    && useradd --uid 1000 --gid 1000 --create-home --shell /bin/bash appuser \
+    && mkdir -p /app/logs \
+    && chown -R appuser:appuser /app
 
-ENV ASPNETCORE_ENVIRONMENT=Production
+COPY --from=build --chown=appuser:appuser /app/publish .
+
+USER appuser
+
+ENV ASPNETCORE_ENVIRONMENT=Production \
+    ASPNETCORE_URLS=http://+:8080 \
+    DOTNET_RUNNING_IN_CONTAINER=true
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
+
 ENTRYPOINT ["dotnet", "WebAPI.dll"]
