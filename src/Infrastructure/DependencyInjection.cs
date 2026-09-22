@@ -1,5 +1,6 @@
 using Application.Common;
 using Domain.Repositories;
+using Infrastructure.Caching;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
@@ -48,6 +49,8 @@ public static class DependencyInjection
         services.AddScoped<OrderCleanupJob>();
         services.AddScoped<DailyReportJob>();
         services.AddHostedService<BackgroundJobScheduler>();
+
+        services.AddCaching(configuration);
 
         return services;
     }
