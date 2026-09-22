@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.Common.Behaviors;
 using Domain.Repositories;
+using Hangfire;
 using Infrastructure.Caching;
 using Infrastructure.Common;
 using Infrastructure.Data;
@@ -48,13 +49,38 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
 
-        services.AddSingleton<IBackgroundJobService, InMemoryBackgroundJobService>();
         services.AddScoped<OrderCleanupJob>();
         services.AddScoped<DailyReportJob>();
-        services.AddHostedService<BackgroundJobScheduler>();
+
+        var hangfireSettings = configuration
+            .GetSection(HangfireSettings.SectionName)
+            .Get<HangfireSettings>() ?? new HangfireSettings();
+
+        if (hangfireSettings.Enabled && !string.IsNullOrWhiteSpace(hangfireSettings.ConnectionString))
+        {
+            services.Configure<HangfireSettings>(configuration.GetSection(HangfireSettings.SectionName));
+
+            services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(hangfireSettings.ConnectionString));
+
+            services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = hangfireSettings.WorkerCount;
+                options.Queues = new[] { "default" };
+            });
+
+            services.AddScoped<IBackgroundJobService, HangfireBackgroundJobService>();
+        }
+        else
+        {
+            services.AddSingleton<IBackgroundJobService, InMemoryBackgroundJobService>();
+            services.AddHostedService<BackgroundJobScheduler>();
+        }
 
         services.AddCaching(configuration);
-
         services.AddSingleton<IDiscountService, StaticDiscountService>();
 
         return services;
