@@ -21,6 +21,9 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(PerformanceBehavior<,>));
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
             config.AddOpenBehavior(typeof(CachingBehavior<,>));
+            config.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
+            config.AddOpenBehavior(typeof(MetricsBehavior<,>));
+            config.AddOpenBehavior(typeof(TracingBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(assembly);
