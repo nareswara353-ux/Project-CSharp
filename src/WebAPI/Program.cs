@@ -1,11 +1,13 @@
 using Application;
+using Asp.Versioning.ApiExplorer;
 using Infrastructure;
 using Serilog;
 using WebAPI.Extensions;
-using WebAPI.HealthChecks;
 using WebAPI.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddKeyVaultIfConfigured();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
@@ -19,6 +21,7 @@ builder.Host.UseSerilog();
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddApiVersioningSupport();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
 builder.Services.AddDefaultCors();
@@ -26,20 +29,16 @@ builder.Services.AddDefaultRateLimiter();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-
-builder.Services.AddHealthChecks()
-    .AddCheck<DatabaseHealthCheck>("database", tags: new[] { "db", "sql", "ready" });
+builder.Services.AddValidatedOptions(builder.Configuration);
+builder.Services.AddApplicationHealthChecks(builder.Configuration);
+builder.Services.AddOpenTelemetryObservability(builder.Configuration);
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "Portfolio Enterprise API v1");
-        options.RoutePrefix = "swagger";
-    });
+    var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+    app.UseVersionedSwagger(provider);
 }
 
 app.UseMiddleware<CorrelationIdMiddleware>();
@@ -47,16 +46,17 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseHttpsRedirection();
-
 app.UseCors("DefaultCors");
-
 app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboardIfEnabled(builder.Configuration);
+app.RegisterHangfireRecurringJobs();
+
 app.MapControllers();
-app.MapHealthChecks("/health");
+app.MapHealthEndpoints();
 
 try
 {
