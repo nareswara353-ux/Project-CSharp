@@ -5,6 +5,7 @@ using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
 using Infrastructure.Events;
+using Infrastructure.Jobs;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -42,6 +43,11 @@ public static class DependencyInjection
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
+
+        services.AddSingleton<IBackgroundJobService, InMemoryBackgroundJobService>();
+        services.AddScoped<OrderCleanupJob>();
+        services.AddScoped<DailyReportJob>();
+        services.AddHostedService<BackgroundJobScheduler>();
 
         return services;
     }
