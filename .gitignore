@@ -101,3 +101,8 @@ Desktop.ini
 *.orig
 *.crunch
 *.vshost.*
+
+# Environment files (secrets)
+.env
+.env.*
+!.env.example
