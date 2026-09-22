@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   sqlserver:
@@ -6,38 +6,73 @@ services:
     container_name: portfolio-sqlserver
     environment:
       ACCEPT_EULA: "Y"
-      SA_PASSWORD: "YourStrong!Passw0rd"
-      MSSQL_PID: "Express"
+      MSSQL_SA_PASSWORD: "${SQL_SA_PASSWORD:-YourStrong!Passw0rd}"
+      MSSQL_PID: "Developer"
     ports:
       - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
-    restart: unless-stopped
     networks:
       - portfolio-network
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -Q 'SELECT 1' || exit 1"]
-      interval: 10s
-      retries: 5
+      test:
+        - "CMD-SHELL"
+        - "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || exit 1"
+      interval: 15s
       timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7.4-alpine
+    container_name: portfolio-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - portfolio-network
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
 
   webapi:
     build:
       context: .
       dockerfile: Dockerfile
+    image: portfolio-webapi:latest
     container_name: portfolio-webapi
     environment:
-      ASPNETCORE_ENVIRONMENT: "Development"
-      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=PortfolioEnterpriseDb;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true"
+      ASPNETCORE_ENVIRONMENT: "${ASPNETCORE_ENVIRONMENT:-Production}"
+      ConnectionStrings__DefaultConnection: "Server=sqlserver;Database=PortfolioEnterpriseDb;User Id=sa;Password=${SQL_SA_PASSWORD:-YourStrong!Passw0rd};TrustServerCertificate=True;MultipleActiveResultSets=true;Encrypt=False"
+      ConnectionStrings__Redis: "redis:6379"
+      Jwt__Secret: "${JWT_SECRET:-CHANGE_ME_TO_A_LONG_RANDOM_SECRET_AT_LEAST_32_CHARS_LONG_12345}"
+      Jwt__Issuer: "PortfolioEnterpriseAPI"
+      Jwt__Audience: "PortfolioEnterpriseClient"
+      Jwt__ExpirationMinutes: "60"
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "8080:8080"
     depends_on:
       sqlserver:
         condition: service_healthy
-    restart: unless-stopped
+      redis:
+        condition: service_healthy
     networks:
       - portfolio-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - "wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   portfolio-network:
@@ -45,4 +80,6 @@ networks:
 
 volumes:
   sqlserver-data:
+    driver: local
+  redis-data:
     driver: local
