@@ -25,16 +25,19 @@ public static class CacheServiceExtensions
                 services.AddSingleton<IConnectionMultiplexer>(_ =>
                     ConnectionMultiplexer.Connect(settings.RedisConnectionString));
                 services.AddSingleton<ICacheService, RedisCacheService>();
+                services.AddSingleton<IDistributedLock, RedisDistributedLock>();
                 break;
 
             case CacheProviders.InMemory:
                 services.AddMemoryCache();
                 services.AddSingleton<ICacheService, InMemoryCacheService>();
+                services.AddSingleton<IDistributedLock, NoOpDistributedLock>();
                 break;
 
             case CacheProviders.None:
             default:
                 services.AddSingleton<ICacheService, NoOpCacheService>();
+                services.AddSingleton<IDistributedLock, NoOpDistributedLock>();
                 break;
         }
 
