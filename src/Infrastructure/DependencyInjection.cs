@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Repositories;
 using Infrastructure.Caching;
 using Infrastructure.Common;
@@ -7,6 +8,7 @@ using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
 using Infrastructure.Events;
 using Infrastructure.Jobs;
+using Infrastructure.Pricing;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +37,7 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, EfUserRepository>();
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
+        services.AddScoped<IUnitOfWork, EfUnitOfWork>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
@@ -51,6 +54,8 @@ public static class DependencyInjection
         services.AddHostedService<BackgroundJobScheduler>();
 
         services.AddCaching(configuration);
+
+        services.AddSingleton<IDiscountService, StaticDiscountService>();
 
         return services;
     }
