@@ -1,14 +1,17 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
-using Domain.ValueObjects;
 using MediatR;
 
 namespace Application.Customers;
 
-public record GetCustomerByIdQuery : IRequest<Result<CustomerDto>>
+public record GetCustomerByIdQuery : IRequest<Result<CustomerDto>>, ICacheableQuery
 {
     public Guid Id { get; init; }
+
+    public string CacheKey => CacheKeys.Customer(Id);
+    public TimeSpan? CacheExpiration => CacheDurations.Medium;
 }
 
 public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery, Result<CustomerDto>>
@@ -41,19 +44,6 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
             customer.ShippingAddress?.ToString(),
             customer.IsActive,
             customer.CreatedAt,
-            customer.UpdatedAt
-        );
+            customer.UpdatedAt);
     }
 }
-
-public record CustomerDto(
-    Guid Id,
-    string FirstName,
-    string LastName,
-    string Email,
-    string BillingAddress,
-    string? ShippingAddress,
-    bool IsActive,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt
-);
