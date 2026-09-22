@@ -1,509 +1,265 @@
-# 🏢 Portfolio Enterprise - C# .NET 8
+# Portfolio Enterprise — C# .NET 8
 
-Proyek portofolio enterprise yang mendemonstrasikan implementasi **Clean Architecture** dengan pendekatan **Domain-Driven Design (DDD)**, **CQRS**, dan **Repository Pattern**. Dibangun dengan ekosistem .NET 8 modern dan siap untuk production.
+Enterprise-grade API built with **Clean Architecture**, **Domain-Driven Design (DDD)**, **CQRS**, and **modern .NET 8**. Production-ready with Docker, JWT auth, observability, and comprehensive tests.
 
----
-
-## 📑 Daftar Isi
-
-- [Arsitektur](#-arsitektur)
-- [Teknologi](#-teknologi)
-- [Struktur Proyek](#-struktur-proyek)
-- [Setup & Menjalankan Aplikasi](#-setup--menjalankan-aplikasi)
-- [API Endpoints](#-api-endpoints)
-- [Testing](#-testing)
-- [Logging](#-logging)
-- [Keamanan & Best Practices](#-keamanan--best-practices)
-- [Coverage & Testing](#-coverage--testing)
-- [Fitur Utama](#-fitur-utama)
-- [Catatan Developer](#-catatan-developer)
+[![CI](https://github.com/your-org/Project-CSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/Project-CSharp/actions/workflows/ci.yml)
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 ---
 
-## 🏗️ Arsitektur
+## 🏗️ Architecture
+┌─────────────────────────────────────────────────┐
+│ WebAPI │
+│ Controllers, Middleware, Swagger, Serilog │
+├─────────────────────────────────────────────────┤
+│ Application Layer │
+│ CQRS (MediatR), Behaviors, DTOs, Validators │
+├─────────────────────────────────────────────────┤
+│ Infrastructure Layer │
+│ EF Core, Redis, SMTP, JWT, Jobs, Caching │
+├─────────────────────────────────────────────────┤
+│ Domain Layer │
+│ Entities, Value Objects, Events, Specs │
+└─────────────────────────────────────────────────┘
 
-Proyek mengikuti Clean Architecture dengan pemisahan layer yang jelas:
+text
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                      WebAPI Layer                        │
-│  (ASP.NET Core Controllers, Swagger, Serilog)           │
-├─────────────────────────────────────────────────────────┤
-│                  Application Layer                       │
-│  (CQRS: Commands, Queries, Handlers, Validators)       │
-│  (MediatR, FluentValidation, Result Pattern)           │
-├─────────────────────────────────────────────────────────┤
-│                Infrastructure Layer                      │
-│  (EF Core, SQL Server, Repository Implementation)       │
-├─────────────────────────────────────────────────────────┤
-│                    Domain Layer                          │
-│  (Entities, Value Objects, Repository Interfaces)       │
-│  (Pure Business Logic, No External Dependencies)        │
-└─────────────────────────────────────────────────────────┘
-```
-
-### Penjelasan Layer:
-
-- **Domain Layer**: Inti bisnis aplikasi tanpa ketergantungan eksternal
-- **Application Layer**: Orchestration, CQRS handlers, validasi
-- **Infrastructure Layer**: Implementasi konkret (database, repository)
-- **WebAPI Layer**: Presentation layer (controllers, endpoints)
+**Dependency Rule:** Dependencies always point inward. Domain has zero external dependencies.
 
 ---
 
-## 🚀 Teknologi
+## 🚀 Tech Stack
 
-| Komponen | Versi | Kegunaan |
-|----------|-------|----------|
-| **.NET** | 8 (LTS) | Runtime & Framework |
-| **C#** | 12 | Language |
-| **Entity Framework Core** | 8 | ORM & Database Access |
-| **SQL Server** | Latest | Database |
-| **MediatR** | Latest | CQRS Implementation |
-| **FluentValidation** | Latest | Input Validation |
-| **Serilog** | Latest | Structured Logging |
-| **Swagger/OpenAPI** | Built-in | API Documentation |
-| **xUnit** | Latest | Unit Testing Framework |
-| **Moq** | Latest | Mocking Library |
-| **FluentAssertions** | Latest | Assertion Library |
+| Category | Technology |
+|----------|-----------|
+| Runtime | .NET 8 (LTS), C# 12 |
+| Persistence | EF Core 8, SQL Server 2022 |
+| Messaging | MediatR (CQRS) |
+| Validation | FluentValidation |
+| Auth | JWT Bearer, BCrypt |
+| Caching | InMemory, Redis (StackExchange) |
+| Logging | Serilog (Console + File) |
+| Observability | OpenTelemetry (Traces, Metrics, OTLP) |
+| API Docs | Swagger / OpenAPI |
+| Testing | xUnit, Moq, FluentAssertions, InMemory DB |
+| Container | Docker, Docker Compose |
+| CI/CD | GitHub Actions |
 
 ---
 
-## 📦 Struktur Proyek
-
-```
+## 📦 Project Structure
 PortfolioEnterprise.sln
-│
 ├── src/
-│   ├── Domain/                          # Domain Layer
-│   │   ├── Common/                      # Base classes (Entity, ValueObject)
-│   │   ├── Entities/                    # Aggregate Roots (Customer)
-│   │   ├── ValueObjects/                # Value Objects (Email, Address, Money)
-│   │   └── Repositories/                # Repository Contracts
-│   │
-│   ├── Application/                     # Application Layer
-│   │   ├── Common/                      # Shared utilities (Result Pattern)
-│   │   ├── Customers/                   # Customer Commands/Queries
-│   │   │   ├── Commands/
-│   │   │   ├── Queries/
-│   │   │   └── Handlers/
-│   │   └── DependencyInjection.cs      # DI Registration
-│   │
-│   ├── Infrastructure/                  # Infrastructure Layer
-│   │   ├── Data/                        # DbContext, Migrations, Repositories
-│   │   │   ├── ApplicationDbContext.cs
-│   │   │   ├── Migrations/
-│   │   │   └── Repositories/
-│   │   └── DependencyInjection.cs      # DI Registration
-│   │
-│   └── WebAPI/                          # Presentation Layer
-│       ├── Controllers/                 # API Controllers
-│       ├── Middleware/                  # Exception Handling Middleware
-│       ├── Program.cs                   # Application Setup
-│       ├── appsettings.json            # Configuration
-│       └── appsettings.Development.json
-│
-└── tests/
-    └── Core.Tests/                      # Unit Tests
-        ├── Domain/                      # Tests for ValueObjects & Entities
-        ├── Application/                 # Tests for Commands/Queries
-        └── Infrastructure/              # Tests for Repository
+│ ├── Domain/ # Entities, Value Objects, Events, Specs
+│ ├── Application/ # CQRS, Behaviors, DTOs, Validators
+│ ├── Infrastructure/ # EF Core, Repositories, Email, Jobs, Cache
+│ └── WebAPI/ # Controllers, Middleware, Program.cs
+├── tests/
+│ └── Core.Tests/ # Unit + Integration tests
+├── .github/workflows/ # CI pipeline
+├── Dockerfile # Multi-stage, non-root
+└── docker-compose.yml # WebAPI + SQL Server + Redis
 
-```
+text
 
 ---
 
-## 🛠️ Setup & Menjalankan Aplikasi
+## ⚡ Quick Start
 
-### Prasyarat
-
+### Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- [SQL Server](https://www.microsoft.com/en-us/sql-server/sql-server-downloads) atau SQL Server LocalDB
-- [Git](https://git-scm.com/) (opsional)
+- SQL Server LocalDB (or SQL Server 2022)
+- (Optional) Docker Desktop
 
-### Langkah-langkah Instalasi
-
-#### 1. Clone Repository
+### Local Development
 
 ```bash
-git clone https://github.com/yourusername/PortfolioEnterprise.git
-cd PortfolioEnterprise
-```
+# 1. Clone
+git clone https://github.com/your-org/Project-CSharp.git
+cd Project-CSharp
 
-#### 2. Restore NuGet Packages
-
-```bash
+# 2. Restore
 dotnet restore
-```
 
-#### 3. Konfigurasi Connection String
-
-Edit file `src/WebAPI/appsettings.json` dan sesuaikan connection string:
-
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=PortfolioDb;Trusted_Connection=true;Encrypt=false;"
-  }
-}
-```
-
-Untuk **SQL Server LocalDB**:
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=PortfolioDb;Trusted_Connection=true;"
-  }
-}
-```
-
-#### 4. Apply Database Migrations
-
-```bash
+# 3. Apply migrations
 dotnet ef database update --project src/Infrastructure --startup-project src/WebAPI
-```
 
-#### 5. Jalankan Aplikasi
-
-```bash
+# 4. Run
 dotnet run --project src/WebAPI
-```
+Swagger UI: https://localhost:5001/swagger
 
-Aplikasi akan berjalan di `https://localhost:5001` (atau port yang dikonfigurasi).
+Docker Deployment
+bash
+# 1. Copy env template
+cp .env.example .env
 
-#### 6. Akses Swagger UI
+# 2. Edit .env (set SQL_SA_PASSWORD and JWT_SECRET)
 
-Buka browser dan navigasi ke: **https://localhost:5001/swagger**
+# 3. Run full stack
+docker compose up -d
 
----
+# 4. Check health
+curl http://localhost:8080/health
+🧪 Testing
+bash
+# All tests
+dotnet test
 
-## 🧪 API Endpoints
+# With coverage
+dotnet test --collect:"XPlat Code Coverage"
 
-### Customer Management
+# Specific project
+dotnet test tests/Core.Tests
+Test coverage includes:
 
-| Method | Endpoint | Deskripsi |
-|--------|----------|-----------|
-| **POST** | `/api/customers` | Buat customer baru |
-| **GET** | `/api/customers/{id}` | Ambil customer berdasarkan ID |
-| **PUT** | `/api/customers/{id}` | Update data customer |
-| **GET** | `/api/health` | Health check aplikasi |
+Domain: Value Objects, Entities, Specifications
 
-### Contoh Request
+Application: Command/Query handlers, Pipeline behaviors
 
-#### POST /api/customers - Create Customer
+Infrastructure: Repositories (InMemory)
 
-```bash
-curl -X POST "https://localhost:5001/api/customers" \
+Integration: End-to-end HTTP tests with WebApplicationFactory<Program>
+
+🔌 API Endpoints
+Authentication
+Method	Endpoint	Description	Auth
+POST	/api/auth/register	Register new user	No
+POST	/api/auth/login	Login and get JWT	No
+Customers
+Method	Endpoint	Description	Auth
+GET	/api/customers	Paged list with filters	Yes
+GET	/api/customers/{id}	Get by ID	Yes
+POST	/api/customers	Create	Yes
+PUT	/api/customers/{id}	Update	Yes
+DELETE	/api/customers/{id}	Soft delete	Yes
+Products
+Method	Endpoint	Description	Auth
+GET	/api/products	Paged list	Yes
+GET	/api/products/{id}	Get by ID	Yes
+POST	/api/products	Create	Yes
+PUT	/api/products/{id}	Update	Yes
+Orders
+Method	Endpoint	Description	Auth
+GET	/api/orders/{id}	Get with lines	Yes
+POST	/api/orders	Create order	Yes
+POST	/api/orders/{id}/lines	Add line	Yes
+POST	/api/orders/{id}/confirm	Confirm	Yes
+POST	/api/orders/{id}/ship	Ship	Yes
+POST	/api/orders/{id}/cancel	Cancel	Yes
+Users
+Method	Endpoint	Description	Auth
+GET	/api/users/me	Current user profile	Yes
+GET	/api/users/{id}	Get user (Admin/Manager)	Yes
+POST	/api/users/me/change-password	Change password	Yes
+PUT	/api/users/{id}/role	Update role (Admin)	Yes
+Health
+Method	Endpoint	Description
+GET	/health	Health check (DB + Disk)
+Example: Register
+bash
+curl -X POST http://localhost:8080/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "street": "123 Main St",
-    "city": "New York",
-    "state": "NY",
-    "postalCode": "10001",
-    "country": "USA"
+    "username": "johndoe",
+    "email": "john@example.com",
+    "password": "Password123"
   }'
-```
+Example: Authenticated Request
+bash
+TOKEN="eyJhbGciOi..."
 
-#### Response Success (200 OK)
+curl http://localhost:8080/api/customers \
+  -H "Authorization: Bearer $TOKEN"
+📊 Observability
+Logging (Serilog)
+Console — development
 
-```json
+File — logs/app-YYYYMMDD.txt (rolling daily)
+
+Distributed Tracing (OpenTelemetry)
+Enable in appsettings.json:
+
+json
 {
-  "isSuccess": true,
-  "data": {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "firstName": "John",
-    "lastName": "Doe",
-    "email": "john.doe@example.com",
-    "address": {
-      "street": "123 Main St",
-      "city": "New York",
-      "state": "NY",
-      "postalCode": "10001",
-      "country": "USA"
-    }
+  "Observability": {
+    "Enabled": true,
+    "ServiceName": "PortfolioEnterpriseAPI",
+    "ServiceVersion": "1.0.0",
+    "OtlpEndpoint": "http://localhost:4317",
+    "EnableConsoleExporter": false
   }
 }
-```
+Compatible with Jaeger, Tempo, Honeycomb, Datadog, etc.
 
-#### Response Error (400 Bad Request)
+Metrics
+app.commands.processed — counter
 
-```json
-{
-  "isSuccess": false,
-  "errors": [
-    "Email format is invalid",
-    "First name is required"
-  ]
-}
-```
+app.queries.processed — counter
 
----
+app.commands.failed — counter
 
-## 🧪 Testing
+app.request.duration — histogram (ms)
 
-### Menjalankan Unit Tests
+app.orders.created — counter
 
-```bash
-dotnet test tests/Core.Tests
-```
+app.customers.created — counter
 
-### Menjalankan Tests dengan Coverage Report
-
-```bash
-dotnet test tests/Core.Tests /p:CollectCoverage=true /p:CoverageFormat=opencover
-```
-
-### Struktur Test
+🔐 Security
+JWT with HMAC-SHA256 signing (secret ≥ 32 chars enforced)
 
-Tests diorganisir mengikuti struktur domain:
-
-- **Domain Tests**: Value Objects, Entities, Business Rules
-- **Application Tests**: Commands, Queries, Handlers
-- **Infrastructure Tests**: Repository, DbContext (dengan InMemory Database)
-
-### Contoh Unit Test
-
-```csharp
-public class EmailValueObjectTests
-{
-    [Fact]
-    public void Create_WithValidEmail_ShouldSucceed()
-    {
-        // Arrange & Act
-        var email = Email.Create("test@example.com");
-
-        // Assert
-        email.Should().NotBeNull();
-        email.Value.Should().Be("test@example.com");
-    }
-
-    [Fact]
-    public void Create_WithInvalidEmail_ShouldFail()
-    {
-        // Arrange, Act & Assert
-        Action act = () => Email.Create("invalid-email");
-        act.Should().Throw<DomainException>();
-    }
-}
-```
-
----
-
-## 📊 Logging
-
-Aplikasi menggunakan **Serilog** untuk structured logging:
-
-### Konfigurasi Logging
-
-**Development Environment**:
-- Output ke Console dengan format yang readable
-- Minimal level: Information
-
-**Production Environment**:
-- Output ke rolling file: `logs/app-YYYYMMDD.txt`
-- Minimal level: Warning
-- Automatic file rotation daily
-
-### Contoh Log Output
-
-```
-2024-01-15 10:30:45.123 [INF] Application started successfully
-2024-01-15 10:30:46.456 [INF] HTTP GET /api/customers/123 completed in 45ms
-2024-01-15 10:30:47.789 [WRN] Validation failed for CreateCustomer command
-2024-01-15 10:30:48.012 [ERR] Database connection failed
-```
-
----
-
-## 🔒 Keamanan & Best Practices
-
-### 1. **Result Pattern**
-Menghindari exception untuk kontrol flow normal, menggunakan Result object:
+BCrypt password hashing (work factor 12)
 
-```csharp
-public class Result
-{
-    public bool IsSuccess { get; set; }
-    public List<string> Errors { get; set; }
-    public object Data { get; set; }
-}
-```
-
-### 2. **Global Exception Middleware**
-Menangani semua exception yang tidak tertangani di satu tempat:
-
-```csharp
-app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
-```
-
-### 3. **FluentValidation**
-Validasi input ketat di Application Layer:
-
-```csharp
-public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCommand>
-{
-    public CreateCustomerCommandValidator()
-    {
-        RuleFor(x => x.Email).EmailAddress().NotEmpty();
-        RuleFor(x => x.FirstName).NotEmpty().MaximumLength(100);
-    }
-}
-```
-
-### 4. **Value Objects**
-Enkapsulasi aturan bisnis dan validasi:
-
-```csharp
-public class Email : ValueObject
-{
-    public string Value { get; private set; }
-
-    public static Email Create(string value)
-    {
-        if (!IsValidEmail(value))
-            throw new DomainException("Invalid email format");
-        
-        return new Email { Value = value };
-    }
-}
-```
-
-### 5. **Repository Pattern**
-Abstraksi persistence layer:
-
-```csharp
-public interface ICustomerRepository
-{
-    Task<Customer> GetByIdAsync(Guid id);
-    Task AddAsync(Customer customer);
-    Task UpdateAsync(Customer customer);
-    Task DeleteAsync(Guid id);
-}
-```
-
-### 6. **Dependency Injection**
-Decoupling dan improved testability:
+Role-based authorization (Admin, Manager, User)
 
-```csharp
-services.AddScoped<ICustomerRepository, CustomerRepository>();
-services.AddMediatR(typeof(CreateCustomerCommand));
-```
-
----
-
-## 📈 Coverage & Testing
-
-### Target Coverage
+Rate limiting (100 req/min per user/IP)
 
-- **Value Objects**: 95%+
-- **Entities**: 90%+
-- **Commands/Queries**: 85%+
-- **Repositories**: 80%+
+Global exception handling with sanitized error responses
 
-### Tools
+Non-root Docker user
 
-- **xUnit**: Testing Framework
-- **Moq**: Object Mocking
-- **FluentAssertions**: Readable Assertions
-- **Coverlet**: Coverage Analysis
+Secrets via environment variables
 
-### Menjalankan Coverage Analysis
+🔧 Configuration
+Section	Purpose
+ConnectionStrings:DefaultConnection	SQL Server connection
+Jwt	Secret, Issuer, Audience, ExpirationMinutes
+Email	SMTP settings (Enabled, Host, Port, etc)
+Caching	Provider (None / InMemory / Redis)
+Observability	OpenTelemetry configuration
+Serilog	Logging levels and sinks
+🎯 Design Decisions
+Pattern	Where	Why
+Result Pattern	Application handlers	Explicit error handling, no exceptions for flow
+CQRS	Application	Separates read/write models
+Specification	Domain	Reusable query logic, testable
+Repository	Infrastructure	Abstracts persistence
+Unit of Work	Infrastructure	Transaction consistency
+Domain Events	Domain → Application	Loose coupling between aggregates
+Value Objects	Domain	Encapsulated invariants (Email, Money, SKU)
+Options Pattern	Config	Strongly-typed configuration
+Pipeline Behaviors	MediatR	Cross-cutting concerns
+📈 Roadmap
+□ Email templates stored in DB with admin editor
+□ Event sourcing for Order aggregate
+□ GraphQL API layer
+□ Kubernetes deployment manifests
+□ Load testing with k6
+□ Multi-tenancy support
+📄 License
+MIT License — see LICENSE file for details.
 
-```bash
-dotnet test /p:CollectCoverage=true /p:CoverageFormat=opencover /p:Exclude="[*.Tests]*"
-```
+👤 Author
+Built as an enterprise portfolio project demonstrating:
 
----
+Clean Architecture & SOLID principles
 
-## ✨ Fitur Utama
+Domain-Driven Design (Entities, Value Objects, Aggregates, Domain Events)
 
-### Domain-Driven Design (DDD)
-- Entities dengan business logic
-- Value Objects dengan validasi
-- Repository Interfaces di Domain Layer
-- Aggregate Roots untuk consistency
+CQRS with MediatR & pipeline behaviors
 
-### CQRS (Command Query Responsibility Segregation)
-- Pemisahan Command (write) dan Query (read)
-- MediatR untuk orchestration
-- Focused, single-responsibility handlers
+Modern .NET 8 features (records, primary constructors, file-scoped namespaces)
 
-### Result Pattern
-- Functional error handling
-- Tidak menggunakan exception untuk flow kontrol
-- Explicit error messages untuk client
+Testable design (unit + integration tests)
 
-### Repository Pattern
-- Abstraksi data access
-- Easy to mock untuk testing
-- Flexible database implementation
-
-### Structured Logging
-- Serilog untuk structured logging
-- Contextual information
-- Production-ready log rotation
-
-### Global Exception Handling
-- Middleware terpusat
-- Konsisten error response
-- Security: tidak expose sensitive info
-
----
-
-## 🧑‍💻 Catatan Developer
-
-### Designing untuk Test
-
-Proyek ini didesain dengan testability sebagai prinsip utama:
-
-- Dependency Injection digunakan di semua layer
-- Value Objects immutable dan mudah ditest
-- Repository pattern memudahkan mocking
-- CQRS handlers fokus pada single responsibility
-
-### Menambah Fitur Baru
-
-1. **Domain Layer**: Definisikan Entity/Value Object
-2. **Application Layer**: Buat Command/Query dan Handler
-3. **Infrastructure Layer**: Implementasikan Repository
-4. **WebAPI Layer**: Buat Controller endpoint
-5. **Tests**: Tulis unit tests untuk setiap layer
-
-### Konvensi Coding
-
-- PascalCase untuk class dan method names
-- camelCase untuk variable names
-- Implicit usings (C# 12)
-- Primary constructors untuk dependency injection
-- Records untuk immutable DTOs
-
----
-
-## 📝 Lisensi
-
-Proyek ini dibuat sebagai portfolio untuk mendemonstrasikan:
-
-✅ Clean Code & SOLID Principles  
-✅ Domain-Driven Design Implementation  
-✅ CQRS & MediatR Pattern  
-✅ Entity Framework Core & SQL Server  
-✅ Unit Testing & Testable Design  
-✅ Modern .NET Ecosystem Best Practices  
-
----
-
-## 👨‍💼 Author
-
-Dibangun oleh **Principal Engineer & .NET Solutions Architect** sebagai portofolio enterprise-grade.
-
----
-
-## 📧 Support
-
-Untuk pertanyaan atau issues, silakan buat issue di repository atau hubungi developer.
-
-**Last Updated**: January 2024  
-**.NET Version**: 8 (LTS)
+Production-ready deployment (Docker, health checks, observability)
