@@ -4,57 +4,11 @@ using Application.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 namespace WebAPI.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddSwaggerDocumentation(this IServiceCollection services)
-    {
-        services.AddSwaggerGen(options =>
-        {
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Portfolio Enterprise API",
-                Version = "v1",
-                Description = "Enterprise-grade .NET 8 API with Clean Architecture, DDD, and CQRS.",
-                Contact = new OpenApiContact
-                {
-                    Name = "Portfolio Enterprise",
-                    Email = "dev@portfolio.local"
-                }
-            });
-
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT",
-                In = ParameterLocation.Header,
-                Description = "Enter JWT token (without 'Bearer ' prefix)."
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
-
-        return services;
-    }
-
     public static IServiceCollection AddDefaultCors(
         this IServiceCollection services,
         string policyName = "DefaultCors")
