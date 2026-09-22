@@ -3,6 +3,7 @@ using Domain.Repositories;
 using Infrastructure.Common;
 using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
+using Infrastructure.Email;
 using Infrastructure.Events;
 using Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,10 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
+
+        services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
+        services.AddScoped<IEmailService, SmtpEmailService>();
+        services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
 
         return services;
     }
