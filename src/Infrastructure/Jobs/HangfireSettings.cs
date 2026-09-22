@@ -8,7 +8,9 @@ public class HangfireSettings
 
     public bool Enabled { get; set; }
 
-    [Url(ErrorMessage = "Hangfire:DashboardPath must be a valid path.")]
+    public string? ConnectionString { get; set; }
+
+    [Required]
     public string DashboardPath { get; set; } = "/hangfire";
 
     [Range(1, 100, ErrorMessage = "Hangfire:WorkerCount must be between 1 and 100.")]
