@@ -18,7 +18,7 @@ public class InMemoryBackgroundJobService : IBackgroundJobService
         _logger = logger;
     }
 
-    public void Enqueue<T>(Expression<Func<T, Task>> methodCall)
+    public void Enqueue<T>(Expression<Func<T, Task>> methodCall) where T : notnull
     {
         _ = Task.Run(async () =>
         {
@@ -38,7 +38,7 @@ public class InMemoryBackgroundJobService : IBackgroundJobService
         });
     }
 
-    public void Schedule<T>(Expression<Func<T, Task>> methodCall, TimeSpan delay)
+    public void Schedule<T>(Expression<Func<T, Task>> methodCall, TimeSpan delay) where T : notnull
     {
         _ = Task.Run(async () =>
         {
@@ -62,7 +62,7 @@ public class InMemoryBackgroundJobService : IBackgroundJobService
     public void AddOrUpdateRecurring<T>(
         string jobId,
         Expression<Func<T, Task>> methodCall,
-        string cronExpression)
+        string cronExpression) where T : notnull
     {
         _logger.LogInformation(
             "Recurring job {JobId} registered with schedule {Cron} (no-op in memory implementation)",
