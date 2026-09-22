@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-config
+  namespace: default
+  labels:
+    app: portfolio-webapi
+data:
+  ASPNETCORE_ENVIRONMENT: "Production"
+  ASPNETCORE_URLS: "http://+:8080"
+  Caching__Provider: "Redis"
+  Observability__Enabled: "true"
+  Observability__ServiceName: "PortfolioEnterpriseAPI"
+  Observability__ServiceVersion: "1.0.0"
+  Observability__OtlpEndpoint: "http://otel-collector:4317"
+  Hangfire__Enabled: "true"
+  Hangfire__DashboardPath: "/hangfire"
+  Hangfire__WorkerCount: "5"
+  Hangfire__EnableDashboard: "true"
+  Email__Enabled: "true"
+  Email__Host: "smtp.sendgrid.net"
+  Email__Port: "587"
+  Email__EnableSsl: "true"
+  Email__FromAddress: "noreply@portfolio.local"
