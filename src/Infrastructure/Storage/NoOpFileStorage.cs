@@ -23,7 +23,7 @@ public class NoOpFileStorage : IFileStorage
         CancellationToken cancellationToken = default)
         => throw new InvalidOperationException(Message);
 
-    public Task<FileInfo?> GetMetadataAsync(
+    public Task<StoredFileInfo?> GetMetadataAsync(
         string fileId,
         CancellationToken cancellationToken = default)
         => throw new InvalidOperationException(Message);
