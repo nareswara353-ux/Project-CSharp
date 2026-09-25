@@ -9,7 +9,7 @@ public record GetFileQuery : IRequest<Result<FileDownload>>
     public string FileId { get; init; } = string.Empty;
 }
 
-public record FileDownload(Stream Content, FileInfo Metadata);
+public record FileDownload(Stream Content, StoredFileInfo Metadata);
 
 public class GetFileQueryHandler : IRequestHandler<GetFileQuery, Result<FileDownload>>
 {
