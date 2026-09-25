@@ -16,7 +16,7 @@ public interface IFileStorage
         string fileId,
         CancellationToken cancellationToken = default);
 
-    Task<FileInfo?> GetMetadataAsync(
+    Task<StoredFileInfo?> GetMetadataAsync(
         string fileId,
         CancellationToken cancellationToken = default);
 
@@ -32,7 +32,7 @@ public record StoredFile(
     long SizeBytes,
     DateTime UploadedAt);
 
-public record FileInfo(
+public record StoredFileInfo(
     string FileId,
     string FileName,
     string ContentType,
