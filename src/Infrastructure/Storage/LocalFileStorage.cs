@@ -115,18 +115,18 @@ public class LocalFileStorage : IFileStorage
         return Task.FromResult(true);
     }
 
-    public Task<FileInfo?> GetMetadataAsync(
+    public Task<StoredFileInfo?> GetMetadataAsync(
         string fileId,
         CancellationToken cancellationToken = default)
     {
         var fullPath = GetSafePath(fileId);
 
         if (!File.Exists(fullPath))
-            return Task.FromResult<FileInfo?>(null);
+            return Task.FromResult<StoredFileInfo?>(null);
 
         var info = new System.IO.FileInfo(fullPath);
 
-        return Task.FromResult<FileInfo?>(new FileInfo(
+        return Task.FromResult<StoredFileInfo?>(new StoredFileInfo(
             fileId,
             Path.GetFileNameWithoutExtension(fileId),
             GetContentType(info.Extension),
