@@ -8,9 +8,11 @@ using Infrastructure.Data;
 using Infrastructure.Data.Repositories;
 using Infrastructure.Email;
 using Infrastructure.Events;
+using Infrastructure.Features;
 using Infrastructure.Jobs;
 using Infrastructure.Pricing;
 using Infrastructure.Security;
+using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -81,7 +83,10 @@ public static class DependencyInjection
         }
 
         services.AddCaching(configuration);
+        services.AddFileStorage(configuration);
+
         services.AddSingleton<IDiscountService, StaticDiscountService>();
+        services.AddSingleton<IFeatureFlagService, InMemoryFeatureFlagService>();
 
         return services;
     }
