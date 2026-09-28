@@ -91,6 +91,7 @@ public static class ServiceCollectionExtensions
             });
 
         services.AddAuthorization();
+        services.AddPermissionAuthorization();
 
         return services;
     }
