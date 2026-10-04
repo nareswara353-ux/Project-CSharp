@@ -1,10 +1,12 @@
-using System.Security.Claims;
+using Application.Common;
 using Application.Users;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Attributes;
 using WebAPI.Common;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -25,7 +27,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCurrentUser()
     {
-        var userId = GetCurrentUserId();
+        var userId = HttpContext.GetUserId();
         if (userId is null)
             return Unauthorized(new { error = "Invalid token", code = "INVALID_TOKEN" });
 
@@ -41,7 +43,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [HasPermission(Permissions.Admin.ManageUsers)]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -60,7 +62,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordCommand command)
     {
-        var userId = GetCurrentUserId();
+        var userId = HttpContext.GetUserId();
         if (userId is null)
             return Unauthorized(new { error = "Invalid token", code = "INVALID_TOKEN" });
 
@@ -77,7 +79,7 @@ public class UsersController : ControllerBase
     }
 
     [HttpPut("{id:guid}/role")]
-    [Authorize(Roles = "Admin")]
+    [HasPermission(Permissions.Admin.ManageUsers)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateUserRoleRequest request)
     {
@@ -91,14 +93,6 @@ public class UsersController : ControllerBase
                 "NOT_FOUND" => NotFound(new { error = result.Error }),
                 _ => BadRequest(new { error = result.Error, code = result.ErrorCode })
             });
-    }
-
-    private Guid? GetCurrentUserId()
-    {
-        var claim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-            ?? User.FindFirst("sub")?.Value;
-
-        return Guid.TryParse(claim, out var id) ? id : null;
     }
 }
 
