@@ -25,6 +25,8 @@ public class FileStorageSettings
 
     public string? AzureConnectionString { get; set; }
 
+    public string? AzureContainerUrl { get; set; }
+
     public bool PublicAccess { get; set; } = false;
 }
 
