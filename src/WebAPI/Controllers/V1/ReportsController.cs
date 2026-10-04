@@ -1,8 +1,10 @@
+using Application.Common;
 using Application.Reports;
 using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Attributes;
 using WebAPI.Common;
 
 namespace WebAPI.Controllers.V1;
@@ -10,7 +12,7 @@ namespace WebAPI.Controllers.V1;
 [ApiController]
 [ApiVersion("1.0")]
 [Route(ApiRoutes.Reports)]
-[Authorize(Roles = "Admin,Manager")]
+[Authorize]
 public class ReportsController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -21,6 +23,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("sales")]
+    [HasPermission(Permissions.Reports.Sales)]
     [ProducesResponseType(typeof(SalesReportDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetSalesReport(
@@ -41,6 +44,7 @@ public class ReportsController : ControllerBase
     }
 
     [HttpGet("inventory")]
+    [HasPermission(Permissions.Reports.Inventory)]
     [ProducesResponseType(typeof(InventoryReportDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInventoryReport([FromQuery] int lowStockThreshold = 10)
     {
