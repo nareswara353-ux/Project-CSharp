@@ -1,3 +1,4 @@
+using WebAPI.Common;
 using WebAPI.Middleware;
 
 namespace WebAPI.Extensions;
@@ -18,4 +19,19 @@ public static class HttpContextExtensions
 
     public static bool IsAuthenticated(this HttpContext context)
         => context.User.Identity?.IsAuthenticated ?? false;
+
+    public static RequestMetadata GetRequestMetadata(this HttpContext context)
+    {
+        var ipAddress = context.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+            ?? context.Connection.RemoteIpAddress?.ToString();
+
+        var userAgent = context.Request.Headers.UserAgent.ToString();
+
+        return new RequestMetadata(
+            context.GetCorrelationId(),
+            context.GetUserId(),
+            context.GetUsername(),
+            ipAddress,
+            string.IsNullOrWhiteSpace(userAgent) ? null : userAgent);
+    }
 }
