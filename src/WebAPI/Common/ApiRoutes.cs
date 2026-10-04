@@ -10,4 +10,6 @@ public static class ApiRoutes
     public const string Orders = Base + "/orders";
     public const string Users = Base + "/users";
     public const string Reports = Base + "/reports";
+    public const string Files = Base + "/files";
+    public const string FeatureFlags = Base + "/featureflags";
 }
