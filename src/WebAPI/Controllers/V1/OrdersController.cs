@@ -4,7 +4,9 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Attributes;
 using WebAPI.Common;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -22,6 +24,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [HasPermission(Permissions.Orders.Read)]
     [ProducesResponseType(typeof(OrderDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
@@ -37,7 +40,20 @@ public class OrdersController : ControllerBase
             });
     }
 
+    [HttpGet("customer/{customerId:guid}")]
+    [HasPermission(Permissions.Orders.Read)]
+    [ProducesResponseType(typeof(IReadOnlyList<OrderDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetByCustomer(Guid customerId)
+    {
+        var result = await _mediator.Send(new GetOrdersByCustomerQuery { CustomerId = customerId });
+
+        return result.Match(
+            onSuccess: () => Ok(result.Value),
+            onFailure: () => BadRequest(new { error = result.Error, code = result.ErrorCode }));
+    }
+
     [HttpPost]
+    [HasPermission(Permissions.Orders.Create)]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     public async Task<IActionResult> Create([FromBody] CreateOrderCommand command)
     {
@@ -53,6 +69,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id:guid}/lines")]
+    [HasPermission(Permissions.Orders.Create)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> AddLine(Guid id, [FromBody] AddOrderLineCommand command)
     {
@@ -71,6 +88,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id:guid}/confirm")]
+    [HasPermission(Permissions.Orders.Confirm)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Confirm(Guid id)
     {
@@ -86,6 +104,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id:guid}/ship")]
+    [HasPermission(Permissions.Orders.Ship)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Ship(Guid id)
     {
@@ -101,6 +120,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost("{id:guid}/cancel")]
+    [HasPermission(Permissions.Orders.Cancel)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Cancel(Guid id)
     {
