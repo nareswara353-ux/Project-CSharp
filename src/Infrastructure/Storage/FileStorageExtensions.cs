@@ -24,8 +24,8 @@ public static class FileStorageExtensions
                 break;
 
             case FileStorageProviders.AzureBlob:
-                throw new NotSupportedException(
-                    "AzureBlob provider is not yet wired. Use Local or None.");
+                services.AddSingleton<IFileStorage, AzureBlobFileStorage>();
+                break;
 
             case FileStorageProviders.None:
             default:
