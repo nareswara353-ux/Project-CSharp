@@ -13,6 +13,7 @@ public class Customer : Entity
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
+    public byte[] RowVersion { get; private set; } = Array.Empty<byte>();
 
     private Customer()
     {
