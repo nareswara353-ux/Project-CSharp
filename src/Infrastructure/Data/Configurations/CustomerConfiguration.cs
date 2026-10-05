@@ -18,6 +18,10 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
         builder.Property(c => c.CreatedAt).IsRequired().HasDefaultValueSql("GETUTCDATE()");
         builder.Property(c => c.UpdatedAt).IsRequired(false);
 
+        builder.Property(c => c.RowVersion)
+            .IsRowVersion()
+            .IsConcurrencyToken();
+
         builder.Ignore(c => c.DomainEvents);
         builder.Ignore(c => c.FullName);
 
