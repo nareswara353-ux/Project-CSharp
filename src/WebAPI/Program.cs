@@ -24,6 +24,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddApiVersioningSupport();
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.AddCurrentUserContext();
 builder.Services.AddDefaultCors();
 builder.Services.AddDefaultRateLimiter();
 
