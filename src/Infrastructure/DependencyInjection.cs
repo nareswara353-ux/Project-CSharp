@@ -12,6 +12,7 @@ using Infrastructure.Features;
 using Infrastructure.Jobs;
 using Infrastructure.Pricing;
 using Infrastructure.Security;
+using Infrastructure.Services;
 using Infrastructure.Storage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -38,9 +39,11 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<>), typeof(EfRepository<>));
         services.AddScoped<IOrderRepository, EfOrderRepository>();
         services.AddScoped<IUserRepository, EfUserRepository>();
+        services.AddScoped<IAuditLogRepository, EfAuditLogRepository>();
 
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+        services.AddScoped<IAuditService, AuditService>();
         services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
