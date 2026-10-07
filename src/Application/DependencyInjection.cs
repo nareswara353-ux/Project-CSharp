@@ -22,6 +22,7 @@ public static class DependencyInjection
             config.AddOpenBehavior(typeof(ValidationBehavior<,>));
             config.AddOpenBehavior(typeof(CachingBehavior<,>));
             config.AddOpenBehavior(typeof(CacheInvalidationBehavior<,>));
+            config.AddOpenBehavior(typeof(AuditLoggingBehavior<,>));
             config.AddOpenBehavior(typeof(MetricsBehavior<,>));
             config.AddOpenBehavior(typeof(TracingBehavior<,>));
         });
