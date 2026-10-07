@@ -4,11 +4,20 @@ using Application.Common;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using WebAPI.Services;
 
 namespace WebAPI.Extensions;
 
 public static class ServiceCollectionExtensions
 {
+    public static IServiceCollection AddCurrentUserContext(this IServiceCollection services)
+    {
+        services.AddHttpContextAccessor();
+        services.AddScoped<ICurrentUserService, HttpContextCurrentUserService>();
+
+        return services;
+    }
+
     public static IServiceCollection AddDefaultCors(
         this IServiceCollection services,
         string policyName = "DefaultCors")
