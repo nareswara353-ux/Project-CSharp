@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
@@ -6,9 +7,13 @@ using MediatR;
 
 namespace Application.Customers;
 
-public record DeleteCustomerCommand : IRequest<Result>
+public record DeleteCustomerCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid Id { get; init; }
+
+    public string AuditAction => "CustomerDeactivated";
+    public string AuditEntityType => nameof(Customer);
+    public string? AuditEntityId => Id.ToString();
 }
 
 public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerCommand, Result>
@@ -28,7 +33,6 @@ public class DeleteCustomerCommandHandler : IRequestHandler<DeleteCustomerComman
             if (customer is null)
                 return Result.Failure($"Customer with ID {request.Id} not found", "NOT_FOUND");
 
-            // Soft delete via domain method
             customer.Deactivate();
             _customerRepository.Update(customer);
             await _customerRepository.SaveChangesAsync(cancellationToken);
