@@ -1,13 +1,14 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
-using MediatR;
 using FluentValidation;
+using MediatR;
 
 namespace Application.Customers;
 
-public record CreateCustomerCommand : IRequest<Result<Guid>>
+public record CreateCustomerCommand : IRequest<Result<Guid>>, IAuditableRequest
 {
     public string FirstName { get; init; } = string.Empty;
     public string LastName { get; init; } = string.Empty;
@@ -17,6 +18,10 @@ public record CreateCustomerCommand : IRequest<Result<Guid>>
     public string State { get; init; } = string.Empty;
     public string PostalCode { get; init; } = string.Empty;
     public string Country { get; init; } = string.Empty;
+
+    public string AuditAction => "CustomerCreated";
+    public string AuditEntityType => nameof(Customer);
+    public string? AuditEntityId => null;
 }
 
 public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Result<Guid>>
