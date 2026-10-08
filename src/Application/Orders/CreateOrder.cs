@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
@@ -16,11 +17,15 @@ public record OrderLineRequest
     public int Quantity { get; init; }
 }
 
-public record CreateOrderCommand : IRequest<Result<Guid>>
+public record CreateOrderCommand : IRequest<Result<Guid>>, IAuditableRequest
 {
     public Guid CustomerId { get; init; }
     public string? Notes { get; init; }
     public IReadOnlyList<OrderLineRequest> Lines { get; init; } = Array.Empty<OrderLineRequest>();
+
+    public string AuditAction => "OrderCreated";
+    public string AuditEntityType => nameof(Order);
+    public string? AuditEntityId => null;
 }
 
 public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Result<Guid>>
