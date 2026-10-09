@@ -8,7 +8,7 @@ Enterprise-grade API built with **Clean Architecture**, **Domain-Driven Design (
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 ┌─────────────────────────────────────────────────┐
 │ WebAPI │
 │ Controllers, Middleware, Swagger, Serilog │
@@ -29,7 +29,7 @@ text
 
 ---
 
-## 🚀 Tech Stack
+##  Tech Stack
 
 | Category | Technology |
 |----------|-----------|
@@ -48,7 +48,7 @@ text
 
 ---
 
-## 📦 Project Structure
+##  Project Structure
 PortfolioEnterprise.sln
 ├── src/
 │ ├── Domain/ # Entities, Value Objects, Events, Specs
@@ -65,7 +65,7 @@ text
 
 ---
 
-## ⚡ Quick Start
+##  Quick Start
 
 ### Prerequisites
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
@@ -101,7 +101,7 @@ docker compose up -d
 
 # 4. Check health
 curl http://localhost:8080/health
-🧪 Testing
+ Testing
 bash
 # All tests
 dotnet test
@@ -171,7 +171,7 @@ TOKEN="eyJhbGciOi..."
 
 curl http://localhost:8080/api/customers \
   -H "Authorization: Bearer $TOKEN"
-📊 Observability
+ Observability
 Logging (Serilog)
 Console — development
 
@@ -205,7 +205,7 @@ app.orders.created — counter
 
 app.customers.created — counter
 
-🔐 Security
+ Security
 JWT with HMAC-SHA256 signing (secret ≥ 32 chars enforced)
 
 BCrypt password hashing (work factor 12)
@@ -220,7 +220,7 @@ Non-root Docker user
 
 Secrets via environment variables
 
-🔧 Configuration
+ Configuration
 Section	Purpose
 ConnectionStrings:DefaultConnection	SQL Server connection
 Jwt	Secret, Issuer, Audience, ExpirationMinutes
@@ -228,7 +228,7 @@ Email	SMTP settings (Enabled, Host, Port, etc)
 Caching	Provider (None / InMemory / Redis)
 Observability	OpenTelemetry configuration
 Serilog	Logging levels and sinks
-🎯 Design Decisions
+ Design Decisions
 Pattern	Where	Why
 Result Pattern	Application handlers	Explicit error handling, no exceptions for flow
 CQRS	Application	Separates read/write models
@@ -239,17 +239,17 @@ Domain Events	Domain → Application	Loose coupling between aggregates
 Value Objects	Domain	Encapsulated invariants (Email, Money, SKU)
 Options Pattern	Config	Strongly-typed configuration
 Pipeline Behaviors	MediatR	Cross-cutting concerns
-📈 Roadmap
+ Roadmap
 □ Email templates stored in DB with admin editor
 □ Event sourcing for Order aggregate
 □ GraphQL API layer
 □ Kubernetes deployment manifests
 □ Load testing with k6
 □ Multi-tenancy support
-📄 License
+ License
 MIT License — see LICENSE file for details.
 
-👤 Author
+ Author
 Built as an enterprise portfolio project demonstrating:
 
 Clean Architecture & SOLID principles
