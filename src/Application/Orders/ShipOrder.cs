@@ -1,13 +1,19 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Orders;
 
-public record ShipOrderCommand : IRequest<Result>
+public record ShipOrderCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid OrderId { get; init; }
+
+    public string AuditAction => "OrderShipped";
+    public string AuditEntityType => nameof(Order);
+    public string? AuditEntityId => OrderId.ToString();
 }
 
 public class ShipOrderCommandHandler : IRequestHandler<ShipOrderCommand, Result>
