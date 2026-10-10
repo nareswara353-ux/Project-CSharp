@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
@@ -7,7 +8,7 @@ using MediatR;
 
 namespace Application.Products;
 
-public record UpdateProductCommand : IRequest<Result>
+public record UpdateProductCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid Id { get; init; }
     public string Name { get; init; } = string.Empty;
@@ -15,6 +16,10 @@ public record UpdateProductCommand : IRequest<Result>
     public decimal Price { get; init; }
     public string Currency { get; init; } = "USD";
     public int StockQuantity { get; init; }
+
+    public string AuditAction => "ProductUpdated";
+    public string AuditEntityType => nameof(Product);
+    public string? AuditEntityId => Id.ToString();
 }
 
 public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand, Result>
