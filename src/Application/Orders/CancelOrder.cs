@@ -1,13 +1,19 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Orders;
 
-public record CancelOrderCommand : IRequest<Result>
+public record CancelOrderCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid OrderId { get; init; }
+
+    public string AuditAction => "OrderCancelled";
+    public string AuditEntityType => nameof(Order);
+    public string? AuditEntityId => OrderId.ToString();
 }
 
 public class CancelOrderCommandHandler : IRequestHandler<CancelOrderCommand, Result>
