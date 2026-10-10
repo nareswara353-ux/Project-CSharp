@@ -1,13 +1,14 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
-using MediatR;
 using FluentValidation;
+using MediatR;
 
 namespace Application.Customers;
 
-public record UpdateCustomerCommand : IRequest<Result>
+public record UpdateCustomerCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid Id { get; init; }
     public string FirstName { get; init; } = string.Empty;
@@ -18,6 +19,10 @@ public record UpdateCustomerCommand : IRequest<Result>
     public string State { get; init; } = string.Empty;
     public string PostalCode { get; init; } = string.Empty;
     public string Country { get; init; } = string.Empty;
+
+    public string AuditAction => "CustomerUpdated";
+    public string AuditEntityType => nameof(Customer);
+    public string? AuditEntityId => Id.ToString();
 }
 
 public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerCommand, Result>
@@ -37,17 +42,15 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
             if (customer is null)
                 return Result.Failure($"Customer with ID {request.Id} not found", "NOT_FOUND");
 
-            // Update domain aggregates using domain methods
             customer.UpdateName(request.FirstName, request.LastName);
             customer.UpdateEmail(Email.Create(request.Email));
-            
+
             var newAddress = new Address(
                 request.Street,
                 request.City,
                 request.State,
                 request.PostalCode,
-                request.Country
-            );
+                request.Country);
             customer.UpdateBillingAddress(newAddress);
 
             _customerRepository.Update(customer);
