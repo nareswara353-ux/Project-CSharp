@@ -106,3 +106,6 @@ Desktop.ini
 .env
 .env.*
 !.env.example
+
+vendor/bundle
+node_modules
