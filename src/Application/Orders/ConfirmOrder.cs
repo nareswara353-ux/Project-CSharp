@@ -1,13 +1,19 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Orders;
 
-public record ConfirmOrderCommand : IRequest<Result>
+public record ConfirmOrderCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid OrderId { get; init; }
+
+    public string AuditAction => "OrderConfirmed";
+    public string AuditEntityType => nameof(Order);
+    public string? AuditEntityId => OrderId.ToString();
 }
 
 public class ConfirmOrderCommandHandler : IRequestHandler<ConfirmOrderCommand, Result>
