@@ -1,4 +1,6 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
 using FluentValidation;
@@ -6,7 +8,7 @@ using MediatR;
 
 namespace Application.Orders;
 
-public record AddOrderLineCommand : IRequest<Result>
+public record AddOrderLineCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid OrderId { get; init; }
     public Guid ProductId { get; init; }
@@ -14,6 +16,10 @@ public record AddOrderLineCommand : IRequest<Result>
     public decimal UnitPrice { get; init; }
     public string Currency { get; init; } = "USD";
     public int Quantity { get; init; }
+
+    public string AuditAction => "OrderLineAdded";
+    public string AuditEntityType => nameof(Order);
+    public string? AuditEntityId => OrderId.ToString();
 }
 
 public class AddOrderLineCommandHandler : IRequestHandler<AddOrderLineCommand, Result>
