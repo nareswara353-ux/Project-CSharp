@@ -1,15 +1,21 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Users;
 
-public record ChangePasswordCommand : IRequest<Result>
+public record ChangePasswordCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid UserId { get; init; }
     public string CurrentPassword { get; init; } = string.Empty;
     public string NewPassword { get; init; } = string.Empty;
+
+    public string AuditAction => "UserPasswordChanged";
+    public string AuditEntityType => nameof(User);
+    public string? AuditEntityId => UserId.ToString();
 }
 
 public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Result>
