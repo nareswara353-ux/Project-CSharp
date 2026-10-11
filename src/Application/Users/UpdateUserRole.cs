@@ -1,14 +1,20 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Users;
 
-public record UpdateUserRoleCommand : IRequest<Result>
+public record UpdateUserRoleCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid UserId { get; init; }
     public string Role { get; init; } = string.Empty;
+
+    public string AuditAction => "UserRoleUpdated";
+    public string AuditEntityType => nameof(User);
+    public string? AuditEntityId => UserId.ToString();
 }
 
 public class UpdateUserRoleCommandHandler : IRequestHandler<UpdateUserRoleCommand, Result>
