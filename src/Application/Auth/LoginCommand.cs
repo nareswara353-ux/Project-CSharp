@@ -1,14 +1,20 @@
 using Application.Common;
+using Application.Common.Behaviors;
+using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
 using MediatR;
 
 namespace Application.Auth;
 
-public record LoginCommand : IRequest<Result<AuthResponse>>
+public record LoginCommand : IRequest<Result<AuthResponse>>, IAuditableRequest
 {
     public string UsernameOrEmail { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
+
+    public string AuditAction => "UserLogin";
+    public string AuditEntityType => nameof(User);
+    public string? AuditEntityId => null;
 }
 
 public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<AuthResponse>>
