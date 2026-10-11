@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.ValueObjects;
@@ -9,11 +10,15 @@ namespace Application.Auth;
 
 public record AuthResponse(string Token, Guid UserId, string Username, string Email, string Role);
 
-public record RegisterCommand : IRequest<Result<AuthResponse>>
+public record RegisterCommand : IRequest<Result<AuthResponse>>, IAuditableRequest
 {
     public string Username { get; init; } = string.Empty;
     public string Email { get; init; } = string.Empty;
     public string Password { get; init; } = string.Empty;
+
+    public string AuditAction => "UserRegistered";
+    public string AuditEntityType => nameof(User);
+    public string? AuditEntityId => null;
 }
 
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<AuthResponse>>
