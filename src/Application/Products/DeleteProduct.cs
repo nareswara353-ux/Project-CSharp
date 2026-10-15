@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
@@ -6,9 +7,13 @@ using MediatR;
 
 namespace Application.Products;
 
-public record DeleteProductCommand : IRequest<Result>
+public record DeleteProductCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid Id { get; init; }
+
+    public string AuditAction => "ProductDeactivated";
+    public string AuditEntityType => nameof(Product);
+    public string? AuditEntityId => Id.ToString();
 }
 
 public class DeleteProductCommandHandler : IRequestHandler<DeleteProductCommand, Result>
