@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Common.Behaviors;
 using Domain.Entities;
 using Domain.Repositories;
 using FluentValidation;
@@ -6,9 +7,13 @@ using MediatR;
 
 namespace Application.Products;
 
-public record ActivateProductCommand : IRequest<Result>
+public record ActivateProductCommand : IRequest<Result>, IAuditableRequest
 {
     public Guid Id { get; init; }
+
+    public string AuditAction => "ProductActivated";
+    public string AuditEntityType => nameof(Product);
+    public string? AuditEntityId => Id.ToString();
 }
 
 public class ActivateProductCommandHandler : IRequestHandler<ActivateProductCommand, Result>
