@@ -57,9 +57,11 @@ public class BackgroundJobScheduler : BackgroundService
 
         var cleanupJob = scope.ServiceProvider.GetRequiredService<OrderCleanupJob>();
         var reportJob = scope.ServiceProvider.GetRequiredService<DailyReportJob>();
+        var auditCleanupJob = scope.ServiceProvider.GetRequiredService<AuditLogCleanupJob>();
 
         await cleanupJob.ExecuteAsync();
         await reportJob.ExecuteAsync();
+        await auditCleanupJob.ExecuteAsync();
 
         _logger.LogInformation("Scheduled jobs completed at {Time}", DateTime.UtcNow);
     }
