@@ -54,8 +54,12 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, SmtpEmailService>();
         services.AddScoped<IEmailTemplateRenderer, SimpleEmailTemplateRenderer>();
 
+        services.Configure<AuditLogRetentionSettings>(
+            configuration.GetSection(AuditLogRetentionSettings.SectionName));
+
         services.AddScoped<OrderCleanupJob>();
         services.AddScoped<DailyReportJob>();
+        services.AddScoped<AuditLogCleanupJob>();
 
         var hangfireSettings = configuration
             .GetSection(HangfireSettings.SectionName)
