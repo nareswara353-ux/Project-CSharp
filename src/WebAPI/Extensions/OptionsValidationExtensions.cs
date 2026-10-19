@@ -45,6 +45,12 @@ public static class OptionsValidationExtensions
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services
+            .AddOptions<AuditLogRetentionSettings>()
+            .Bind(configuration.GetSection(AuditLogRetentionSettings.SectionName))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         return services;
     }
 }
