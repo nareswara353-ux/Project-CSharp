@@ -95,3 +95,8 @@ dotnet_naming_style.begins_with_i.capitalization = pascal_case
 [*.{cs,vb}]
 dotnet_diagnostic.CA1848.severity = none
 dotnet_diagnostic.IDE0290.severity = suggestion
+
+# Generated EF Core migrations use block-scoped namespace by default.
+# Disable IDE0161 only for migration files.
+[**/Migrations/*.cs]
+dotnet_diagnostic.IDE0161.severity = none
