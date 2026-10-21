@@ -36,6 +36,18 @@ public static class ResultExtensions
         return FailureToActionResult(result.ErrorCode, result.Error);
     }
 
+    public static IActionResult Match<T>(
+        this Result<T> result,
+        Func<IActionResult> onSuccess,
+        Func<IActionResult> onFailure)
+        => result.IsSuccess ? onSuccess() : onFailure();
+
+    public static IActionResult Match(
+        this Result result,
+        Func<IActionResult> onSuccess,
+        Func<IActionResult> onFailure)
+        => result.IsSuccess ? onSuccess() : onFailure();
+
     private static IActionResult FailureToActionResult(string? errorCode, string? error)
     {
         var body = new { error, code = errorCode };
