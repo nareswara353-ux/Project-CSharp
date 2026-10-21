@@ -19,4 +19,5 @@ public static class JobIds
     public const string OrderCleanup = "order-cleanup";
     public const string DailyReport = "daily-report";
     public const string StaleDraftCleanup = "stale-draft-cleanup";
+    public const string AuditLogCleanup = "audit-log-cleanup";
 }
