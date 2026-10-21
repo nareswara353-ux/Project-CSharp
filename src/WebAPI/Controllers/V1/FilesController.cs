@@ -4,6 +4,7 @@ using Asp.Versioning;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers.V1;
 
