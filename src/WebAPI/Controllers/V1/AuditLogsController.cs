@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Attributes;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers.V1;
 
@@ -51,13 +52,4 @@ public class AuditLogsController : ControllerBase
             onSuccess: () => Ok(result.Value),
             onFailure: () => BadRequest(new { error = result.Error, code = result.ErrorCode }));
     }
-}
-
-public static class ResultExtensions
-{
-    public static IActionResult Match<T>(
-        this Result<T> result,
-        Func<IActionResult> onSuccess,
-        Func<IActionResult> onFailure)
-        => result.IsSuccess ? onSuccess() : onFailure();
 }
