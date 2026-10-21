@@ -18,6 +18,11 @@ public static class HangfireJobRegistration
             job => job.ExecuteAsync(),
             Cron.Daily(6));
 
+        manager.AddOrUpdate<AuditLogCleanupJob>(
+            JobIds.AuditLogCleanup,
+            job => job.ExecuteAsync(),
+            Cron.Daily(3));
+
         logger.LogInformation("Hangfire recurring jobs registered");
     }
 }
