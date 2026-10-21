@@ -50,7 +50,7 @@ public class AuditLoggingBehaviorTests
 
         var response = await behavior.Handle(
             request,
-            _ => Task.FromResult("ok"),
+            () => Task.FromResult("ok"),
             CancellationToken.None);
 
         response.Should().Be("ok");
@@ -81,7 +81,7 @@ public class AuditLoggingBehaviorTests
 
         Func<Task> act = async () => await behavior.Handle(
             request,
-            _ => throw new InvalidOperationException("boom"),
+            () => throw new InvalidOperationException("boom"),
             CancellationToken.None);
 
         await act.Should().ThrowAsync<InvalidOperationException>()
@@ -103,7 +103,7 @@ public class AuditLoggingBehaviorTests
 
         await behavior.Handle(
             request,
-            _ => Task.FromResult("ok"),
+            () => Task.FromResult("ok"),
             CancellationToken.None);
 
         _auditService.Verify(s => s.LogAsync(
@@ -125,7 +125,7 @@ public class AuditLoggingBehaviorTests
 
         Func<Task> act = async () => await behavior.Handle(
             request,
-            _ => Task.FromResult("ok"),
+            () => Task.FromResult("ok"),
             CancellationToken.None);
 
         await act.Should().NotThrowAsync();
