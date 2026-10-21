@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WebAPI.Attributes;
 using WebAPI.Common;
+using WebAPI.Extensions;
 
 namespace WebAPI.Controllers.V1;
 
