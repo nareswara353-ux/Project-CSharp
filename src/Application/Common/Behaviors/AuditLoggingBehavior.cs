@@ -51,7 +51,7 @@ public class AuditLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
             var response = await next();
             stopwatch.Stop();
 
-            await _auditService.LogAsync(new AuditEntry(
+            await SafeLogAsync(new AuditEntry(
                 Action: auditable.AuditAction,
                 EntityType: auditable.AuditEntityType,
                 EntityId: auditable.AuditEntityId,
@@ -69,7 +69,7 @@ public class AuditLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
         {
             stopwatch.Stop();
 
-            await _auditService.LogAsync(new AuditEntry(
+            await SafeLogAsync(new AuditEntry(
                 Action: auditable.AuditAction,
                 EntityType: auditable.AuditEntityType,
                 EntityId: auditable.AuditEntityId,
@@ -84,6 +84,18 @@ public class AuditLoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
 
             _logger.LogWarning(ex, "Auditable request {Request} failed", typeof(TRequest).Name);
             throw;
+        }
+    }
+
+    private async Task SafeLogAsync(AuditEntry entry, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await _auditService.LogAsync(entry, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to write audit log for {Action}", entry.Action);
         }
     }
 
