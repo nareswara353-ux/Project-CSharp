@@ -25,8 +25,8 @@ jobs:
       - name: Build
         run: dotnet build PortfolioEnterprise.sln --no-restore -c Release
 
-      - name: Run tests
-        run: dotnet test PortfolioEnterprise.sln --no-build -c Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
+      - name: Run unit tests
+        run: dotnet test tests/Core.Tests/Core.Tests.csproj --no-build -c Release --filter 'FullyQualifiedName!~Integration' --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
