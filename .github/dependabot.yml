@@ -1,0 +1,47 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 10
+    groups:
+      microsoft:
+        patterns:
+          - "Microsoft.*"
+      opentelemetry:
+        patterns:
+          - "OpenTelemetry.*"
+      testing:
+        patterns:
+          - "xunit*"
+          - "Moq"
+          - "FluentAssertions"
+          - "Testcontainers.*"
+    labels:
+      - "dependencies"
+      - "nuget"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "docker"
