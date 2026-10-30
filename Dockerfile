@@ -16,7 +16,7 @@ COPY tests/ tests/
 
 RUN dotnet publish src/WebAPI/WebAPI.csproj -c Release -o /app/publish --no-restore
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 RUN groupadd --gid 1000 appuser \
