@@ -29,7 +29,7 @@ jobs:
         run: dotnet test tests/Core.Tests/Core.Tests.csproj --no-build -c Release --filter 'FullyQualifiedName!~Integration' --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults
 
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results
@@ -40,7 +40,7 @@ jobs:
         run: dotnet publish src/WebAPI/WebAPI.csproj -c Release -o ./publish
 
       - name: Upload publish artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: webapi-publish
           path: ./publish
