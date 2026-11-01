@@ -6,7 +6,7 @@
 
 <!-- Link ke issue terkait, misal: Closes #123 -->
 
-## 🏷️ Tipe Perubahan
+##  Tipe Perubahan
 
 - [ ] `feat` — Fitur baru
 - [ ] `fix` — Bug fix
@@ -17,7 +17,7 @@
 - [ ] `build` — Build system, CI, dependencies
 - [ ] `breaking` — Breaking change
 
-## ✅ Checklist
+##  Checklist
 
 - [ ] Sudah build lokal (`dotnet build`)
 - [ ] Unit test passed (`dotnet test --filter 'FullyQualifiedName!~Integration'`)
@@ -27,17 +27,17 @@
 - [ ] Migration dibuat (jika ada perubahan schema)
 - [ ] `.editorconfig` dipatuhi (file-scoped namespace, dll)
 
-## 📸 Screenshot / Demo
+##  Screenshot / Demo
 
 <!-- Jika ada perubahan UI, tambahkan screenshot -->
 
-## 🧪 Cara Testing
+##  Cara Testing
 
 <!-- Langkah-langkah untuk reviewer memverifikasi perubahan -->
 1. 
 2. 
 3. 
 
-## 📌 Catatan Tambahan
+##  Catatan Tambahan
 
 <!-- Informasi tambahan yang perlu reviewer ketahui -->
