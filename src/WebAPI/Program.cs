@@ -45,6 +45,7 @@ if (app.Environment.IsDevelopment())
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseMiddleware<MaintenanceModeMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseCors("DefaultCors");
