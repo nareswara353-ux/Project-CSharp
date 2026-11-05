@@ -1,5 +1,6 @@
 using Asp.Versioning.ApiExplorer;
 using Microsoft.OpenApi.Models;
+using WebAPI.OpenApi;
 
 namespace WebAPI.Extensions;
 
@@ -9,6 +10,8 @@ public static class SwaggerExtensions
     {
         services.AddSwaggerGen(options =>
         {
+            options.DocumentFilter<SwaggerDocumentFilter>();
+
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Name = "Authorization",
